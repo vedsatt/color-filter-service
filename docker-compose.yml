@@ -1,0 +1,11 @@
+services:
+  color-filter-app:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./static/uploads:/app/static/uploads
+      - ./templates:/app/templates
+    environment:
+      - GIN_MODE=release
+    restart: unless-stopped
