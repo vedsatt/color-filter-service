@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"git.miem.hse.ru/kg25-26/aisavelev.git/application/handlers"
 
@@ -10,6 +11,8 @@ import (
 )
 
 func main() {
+	createDir()
+
 	r := mux.NewRouter()
 
 	r.Use(handlers.LoggingMiddleware)
@@ -18,10 +21,17 @@ func main() {
 
 	handlers.SetupRoutes(r)
 
-	// Очистка старых сессий
 	go handlers.CleanupSessions()
 
 	log.Println("Server starting on :8080")
 	log.Println("Static files served from: ./static")
 	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+func createDir() {
+	err := os.Mkdir("static/uploads", os.ModePerm)
+	if err != nil && !os.IsExist(err) {
+		log.Fatalf("Failed to create uploads directory: %v", err)
+		return
+	}
 }

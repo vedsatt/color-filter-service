@@ -52,23 +52,28 @@ func CalculateDominantColor(img image.Image) models.ColorRGBA {
 }
 
 func RGBToHSV(r, g, b uint8) [3]float64 {
+	// Перевод в математический
 	rf := float64(r) / 255.0
 	gf := float64(g) / 255.0
 	bf := float64(b) / 255.0
 
+	// Разница между самым ярким и темным компонентом
 	max := math.Max(math.Max(rf, gf), bf)
 	min := math.Min(math.Min(rf, gf), bf)
 	delta := max - min
 
 	var h, s, v float64
+	// Яркость V
 	v = max
 
+	// Насыщенность S
 	if max != 0 {
 		s = delta / max
 	} else {
 		return [3]float64{0, 0, 0}
 	}
 
+	// Оттенок H
 	if delta == 0 {
 		h = 0
 	} else {
