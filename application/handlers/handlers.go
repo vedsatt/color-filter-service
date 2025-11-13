@@ -39,11 +39,11 @@ const galleryTemplate = `<!DOCTYPE html>
         .column { flex: 1; display: flex; flex-direction: column; gap: 20px; }
         .image-card { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease; }
         .image-card:hover { transform: translateY(-5px); }
-        .image-container { width: 100%; height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #000; }
-        .image-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+		.image-container { width: 100%; display: flex; align-items: center; justify-content: center; background: transparent; padding: 10px; }
+		.image-container img { max-width: 400px; width: auto; height: auto; display: block; }
         .image-info { padding: 15px; text-align: center; }
         .deviation { font-weight: bold; color: #666; margin-top: 5px; }
-        .color-wheel { width: 400px; height: 400px; margin: 40px auto; position: relative; border-radius: 50%; background: conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); }
+        .color-wheel { width: 400px; height: 400px; margin: 40px auto; position: relative; border-radius: 50%; background: conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);border: 3px solid #333;box-shadow: 0 0 0 5px white, 0 0 0 8px #ccc; }
         .color-point { position: absolute; width: 10px; height: 10px; background: white; border: 2px solid #333; border-radius: 50%; transform: translate(-50%, -50%); cursor: pointer; }
         .color-label { position: absolute; background: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); white-space: nowrap; cursor: pointer; }
         @media (max-width: 768px) { .gallery-container { flex-direction: column; } .color-wheel { width: 300px; height: 300px; } }
@@ -90,19 +90,98 @@ const galleryTemplate = `<!DOCTYPE html>
         <img class="modal-content" id="modalImage">
     </div>
     <script>
-        function openModal(img) { document.getElementById('imageModal').style.display = 'block'; document.getElementById('modalImage').src = img.src; }
-        function closeModal() { document.getElementById('imageModal').style.display = 'none'; }
+        function openModal(img) { 
+            document.getElementById('imageModal').style.display = 'block'; 
+            document.getElementById('modalImage').src = img.src; 
+        }
+        function closeModal() { 
+            document.getElementById('imageModal').style.display = 'none'; 
+        }
+        
         const colorWheel = document.getElementById('colorWheel');
-        const images = [ {{range .Column1}} { name: "{{.FileName}}", hue: {{printf "%.1f" .Hue}}, deviation: {{printf "%.2f" .Deviation}} }, {{end}} {{range .Column2}} { name: "{{.FileName}}", hue: {{printf "%.1f" .Hue}}, deviation: {{printf "%.2f" .Deviation}} }, {{end}} ];
-        images.forEach((image) => {
-            const angle = (image.hue * Math.PI) / 180, radius = 180, x = 200 + radius * Math.cos(angle), y = 200 + radius * Math.sin(angle);
-            const point = document.createElement('div'); point.className = 'color-point'; point.style.left = x + 'px'; point.style.top = y + 'px';
-            point.onclick = () => { const imgElement = document.querySelector('img[alt=\"' + image.name + '\"]'); if (imgElement) { imgElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); imgElement.parentElement.parentElement.style.animation = 'highlight 1s ease'; setTimeout(() => { imgElement.parentElement.parentElement.style.animation = ''; }, 1000); } };
-            const label = document.createElement('div'); label.className = 'color-label'; label.textContent = image.name; label.style.left = (x + 20) + 'px'; label.style.top = (y - 10) + 'px';
-            label.onclick = () => { const imgElement = document.querySelector('img[alt=\"' + image.name + '\"]'); if (imgElement) openModal(imgElement); };
-            colorWheel.appendChild(point); colorWheel.appendChild(label);
+        const images = [ 
+            {{range .Column1}} 
+            { name: "{{.FileName}}", hue: {{printf "%.1f" .Hue}}, deviation: {{printf "%.2f" .Deviation}} }, 
+            {{end}} 
+            {{range .Column2}} 
+            { name: "{{.FileName}}", hue: {{printf "%.1f" .Hue}}, deviation: {{printf "%.2f" .Deviation}} }, 
+            {{end}} 
+        ];
+        
+        // ПРОСТОЙ ТЕСТ - создадим 6 точек основных цветов
+        const testHues = [0, 60, 120, 180, 240, 300]; // Красный, желтый, зеленый, голубой, синий, пурпурный
+        
+        testHues.forEach((hue, index) => {
+            // Преобразуем hue в угол на круге
+            const angle = ((hue - 90) * Math.PI) / 180; // -90 чтобы красный был сверху
+            const radius = 160;
+            const center = 200;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            
+            const point = document.createElement('div');
+            point.innerHTML = '•'; // Простой маркер
+            point.style.position = 'absolute';
+            point.style.left = x + 'px';
+            point.style.top = y + 'px';
+            point.style.color = 'white';
+            point.style.fontSize = '24px';
+            point.style.fontWeight = 'bold';
+            point.style.textShadow = '2px 2px 4px black';
+            point.style.transform = 'translate(-50%, -50%)';
+            point.style.zIndex = '10';
+            point.title = 'Hue: ' + hue + '°';
+            
+            colorWheel.appendChild(point);
+            
+            console.log('Test point', hue + '°', 'at', x, y);
         });
-        const style = document.createElement('style'); style.textContent = '@keyframes highlight { 0% { box-shadow: 0 4px 15px rgba(0,0,0,0.1); } 50% { box-shadow: 0 4px 20px rgba(255,0,0,0.5); } 100% { box-shadow: 0 4px 15px rgba(0,0,0,0.1); } }'; document.head.appendChild(style);
+        
+        // Теперь добавляем реальные точки изображений
+        images.forEach((image) => {
+            const angle = ((image.hue - 90) * Math.PI) / 180;
+            const radius = 140; // Внутренний круг для реальных точек
+            const center = 200;
+            const x = center + radius * Math.cos(angle);
+            const y = center + radius * Math.sin(angle);
+            
+            const point = document.createElement('div'); 
+            point.className = 'color-point'; 
+            point.style.left = x + 'px'; 
+            point.style.top = y + 'px';
+            point.style.backgroundColor = 'black'; // Черные точки для контраста
+            point.onclick = function() { 
+                const imgElement = document.querySelector('img[alt="' + image.name + '"]'); 
+                if (imgElement) { 
+                    imgElement.scrollIntoView({ behavior: 'smooth', block: 'center' }); 
+                    imgElement.parentElement.parentElement.style.animation = 'highlight 1s ease'; 
+                    setTimeout(function() { imgElement.parentElement.parentElement.style.animation = ''; }, 1000); 
+                } 
+            };
+            
+            const label = document.createElement('div'); 
+            label.className = 'color-label'; 
+            label.textContent = image.name; 
+            label.style.left = (x + 20) + 'px'; 
+            label.style.top = (y - 10) + 'px';
+            label.onclick = function() { 
+                const imgElement = document.querySelector('img[alt="' + image.name + '"]'); 
+                if (imgElement) openModal(imgElement); 
+            };
+            
+            colorWheel.appendChild(point); 
+            colorWheel.appendChild(label);
+            
+            console.log('Image point:', image.name, 'hue:', image.hue, 'at', x, y);
+        });
+        
+        const style = document.createElement('style'); 
+        style.textContent = '@keyframes highlight { 0% { box-shadow: 0 4px 15px rgba(0,0,0,0.1); } 50% { box-shadow: 0 4px 20px rgba(255,0,0,0.5); } 100% { box-shadow: 0 4px 15px rgba(0,0,0,0.1); } }'; 
+        document.head.appendChild(style);
+        
+        // Проверка видимости круга
+        console.log('Color wheel visible:', colorWheel.offsetWidth > 0 && colorWheel.offsetHeight > 0);
+        console.log('Color wheel position:', colorWheel.getBoundingClientRect());
     </script>
 </body>
 </html>`
@@ -317,7 +396,7 @@ func SetTargetHandler(w http.ResponseWriter, r *http.Request) {
 			r, _ := strconv.Atoi(rStr)
 			g, _ := strconv.Atoi(gStr)
 			b, _ := strconv.Atoi(bStr)
-			SetTargetColor(models.ColorRGBA{uint8(r), uint8(g), uint8(b), 255})
+			SetTargetColor(models.ColorRGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: 255})
 		} else {
 			http.Error(w, "No target image provided", http.StatusBadRequest)
 			return
@@ -439,13 +518,21 @@ func FilterHandler(w http.ResponseWriter, r *http.Request) {
 	targetHSV := utils.RGBToHSV(target.R, target.G, target.B)
 	var filtered []models.ImageAnalysis
 
+	minSaturation := 0.1
+	minValue := 0.05
+
 	for _, analysis := range session.Images {
 		hueDistance := math.Abs(analysis.HSV[0] - targetHSV[0])
 		if hueDistance > 180 {
 			hueDistance = 360 - hueDistance
 		}
 
-		if hueDistance <= tolerance {
+		saturation := analysis.HSV[1]
+		value := analysis.HSV[2]
+
+		if hueDistance <= tolerance &&
+			saturation >= minSaturation &&
+			value >= minValue {
 			analysis.Deviation = hueDistance
 			filtered = append(filtered, analysis)
 		}
@@ -476,13 +563,18 @@ func GenerateHTMLHandler(w http.ResponseWriter, r *http.Request) {
 	targetHSV := utils.RGBToHSV(target.R, target.G, target.B)
 	var filtered []models.ImageAnalysis
 
+	minSaturation := 0.1
+	minValue := 0.05
+
 	for _, analysis := range session.Images {
 		hueDistance := math.Abs(analysis.HSV[0] - targetHSV[0])
 		if hueDistance > 180 {
 			hueDistance = 360 - hueDistance
 		}
 
-		if hueDistance <= tolerance {
+		if hueDistance <= tolerance &&
+			analysis.HSV[1] >= minSaturation &&
+			analysis.HSV[2] >= minValue {
 			analysis.Deviation = hueDistance
 			filtered = append(filtered, analysis)
 		}

@@ -1,0 +1,12 @@
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+**/.gitognoe
+**/.git
+
+**/.DS_Store
+
+images
+static/uploads
+README.md

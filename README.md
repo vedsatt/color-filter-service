@@ -109,13 +109,19 @@ http://localhost:8080
 
 Перетащите файлы в область загрузки или нажмите "Select Images"
 
+![upload](./images/upload.png)
+
 **Поддерживаемые форматы:** JPG, JPEG, PNG, GIF
 
 **Максимальный размер файла:** 50MB
 
+![uploaded](./images/uploaded_images.png)
+
 2. **Установка целевого цвета**
 
 Нажмите на любое загруженное изображение, чтобы установить его доминирующий цвет как целевой
+
+![settings](./images/target_image.png)
 
 3. **Настройка фильтрации**
 
@@ -123,11 +129,16 @@ http://localhost:8080
 
 **Sort Direction:** Направление сортировки (по часовой стрелке или против)
 
+![settings](./images/settings.png)
+
 4. **Просмотр и экспорт**
 
 **Preview HTML:** Предпросмотр результата в новой вкладке
 
 **Download HTML:** Скачивание HTML-галереи со всеми отфильтрованными изображениями
+
+![settings](./images/preview_1.png)
+![settings](./images/preview_2.png)
 
 ## API Эндпоинты
 
